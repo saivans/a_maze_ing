@@ -1,0 +1,10 @@
+[project]
+name="mazegen"
+version="1.0.0"
+description="A maze generator library"
+authors=[{name="stagma"}, {name="moguenia"}]
+readme="README.md"
+requires-python=">=3.10"
+[build-system]
+requires=["poetry-core>=2.0.0,<3.0.0"]
+build-backend="poetry.core.masonry.api"

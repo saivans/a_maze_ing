@@ -1,183 +1,178 @@
-*This project has been created as part of the 42 curriculum by [stagma], [moguenia]*
+*This project has been created as part of the 42 curriculum by stagma, moguenia.*
+
+# A-Maze-ing
 
 ## Description
+A-Maze-ing is a Python project that creates random mazes from a config file:
+- generate a maze
+- save it in the required hex format
+- find the shortest path
+- show the maze in the terminal
 
-A-Maze-ing is a maze generator that creates random mazes from a configuration file. It supports perfect mazes (exactly one path between any two points) and includes visual rendering with interactive features. The maze generation logic is packaged as a reusable module that can be installed and used in other projects.
+The project follows the 42 subject rules (Python 3.10+, flake8, mypy, error handling, reusable class).
 
 ## Instructions
 
-### Installation
+### Requirements
+- Python 3.10+
+- pip
 
-Clone the repository and install dependencies:
-
+### Install
 ```bash
 make install
 ```
 
-### Usage
-
-Run the program with a configuration file:
-
+### Run
 ```bash
 make run
 ```
-
-Or manually:
-
+Or:
 ```bash
 python3 a_maze_ing.py config.txt
 ```
 
-### Interactive Controls
+### Debug
+```bash
+make debug
+```
 
-During visual display:
-- Press `1` - Generate new maze
-- Press `2` - Show/hide shortest path
-- Press `3` - Change wall colors
-- Press `4` - Quit
+### Lint
+```bash
+make lint
+```
 
-### Makefile Commands
+### Strict lint (optional)
+```bash
+make lint-strict
+```
 
-- `make install` - Install dependencies
-- `make run` - Execute the program
-- `make debug` - Run with Python debugger
-- `make clean` - Remove temporary files
-- `make lint` - Run flake8 and mypy checks
+### Clean caches
+```bash
+make clean
+```
 
-## Configuration File Format
+## Config File Format
+Use one `KEY=VALUE` per line.
+Lines starting with `#` are comments.
 
-The configuration file uses `KEY=VALUE` format. Comments start with `#`.
+Mandatory keys:
+- `WIDTH` 
+- `HEIGHT` 
+- `ENTRY`
+- `EXIT`
+- `OUTPUT_FILE`
+- `PERFECT`
 
-| Key | Description | Example |
-|-----|-------------|---------|
-| WIDTH | Maze width (number of cells) | WIDTH=20 |
-| HEIGHT | Maze height | HEIGHT=15 |
-| ENTRY | Entry coordinates (x,y) | ENTRY=0,0 |
-| EXIT | Exit coordinates (x,y) | EXIT=19,14 |
-| OUTPUT_FILE | Output filename | OUTPUT_FILE=maze.txt |
-| PERFECT | Is the maze perfect? | PERFECT=True |
+Optional key:
+- `SEED` (example: `SEED=42`)
 
-Optional keys:
-- `SEED` - Random seed for reproducibility (e.g., SEED=42)
-
-### Example config.txt
-
+Example config:
 ```ini
-# Maze configuration
-WIDTH=20
-HEIGHT=15
+WIDTH=42
+HEIGHT=42
 ENTRY=0,0
-EXIT=19,14
-OUTPUT_FILE=maze.txt
-PERFECT=True
+EXIT=42,42
+OUTPUT_FILE=output.txt
+PERFECT=1
 SEED=42
 ```
 
-## Maze Generation Algorithm
+## Maze Rules (Mandatory)
+- Entry and exit must be valid and different.
+- Maze walls must be coherent between neighbor cells.
+- Maze must stay connected (no isolated cells).
+- No open 3x3 area is allowed.
+- If `PERFECT=1`, there is exactly one path from entry to exit.
+- The maze tries to include a visible `42` pattern with closed cells.
+- If maze is too small, `42` may be skipped with a warning message.
 
-I chose the **Recursive Backtracker** algorithm because:
-- It guarantees perfect mazes (one unique path between any two points)
-- Implementation is straightforward and efficient
-- Produces mazes with long corridors and good branching
-- Maps directly to spanning tree concepts in graph theory
+## Output File Format
+Each cell is written as one hex character.
+Bits for walls:
+- bit 0: North
+- bit 1: East
+- bit 2: South
+- bit 3: West
 
-The algorithm works by:
-1. Starting from a random cell
-2. Choosing a random unvisited neighbor
-3. Removing the wall between them
-4. Recursively continuing from the new cell
-5. Backtracking when no unvisited neighbors remain
+After maze rows, the file contains:
+1. empty line
+2. entry coordinates
+3. exit coordinates
+4. shortest path as letters `N E S W`
 
-## Reusable Module
+## Visual Mode
+The terminal view shows:
+- walls
+- entry/exit
+- optional shortest path
+- highlighted `42` cells
 
-The maze generation logic is contained in `src/maze_generator.py` as a `MazeGenerator` class.
+Controls:
+- `1` or `R`: generate a new maze (new seed)
+- `2` or `V`: show/hide shortest path
+- `3` or `T`: change colors/theme
+- `4` or `Q`: quit
+- `P`: play button
 
-### Installation as a Package
+## Bonus Part
 
-The module is distributed as `mazegen-1.0.0-py3-none-any.whl` and `mazegen-1.0.0.tar.gz` at the root of the repository.
 
-Install the package:
+## Reusable Code
+Reusable part: `MazeGenerator` class in `maze_generator.py`.
 
-```bash
-pip install mazegen-1.0.0-py3-none-any.whl
-```
-
-### Basic Usage
-
+Basic use:
 ```python
 from maze_generator import MazeGenerator
 
-# Create generator with dimensions
-generator = MazeGenerator(width=20, height=15, seed=42)
+config = {
+    "WIDTH": 10,
+    "HEIGHT": 10,
+    "ENTRY": (0, 0),
+    "EXIT": (9, 9),
+    "OUTPUT_FILE": "maze.txt",
+    "PERFECT": 1,
+    "SEED": 42,
+}
 
-# Generate maze
-generator.generate(perfect=True)
-
-# Access maze data
-walls = generator.get_cell_walls(x, y)
-
-# Find shortest path
-path = generator.find_path(entry=(0,0), exit=(19,14))
-
-# Save to file
-generator.save_to_file("output.txt", entry=(0,0), exit=(19,14))
+maze = MazeGenerator(config)
+maze_data = generated.generate()
 ```
 
-### Available Methods
+## Team and Project Management
+### Roles
+- `moguenia`: parsing and error handling, maze display and rendering, bonus play button, menu display
+- `stagma`: maze generation algorithm, pathfinding, perfect and non-perfect maze modes
 
-- `__init__(width, height, seed)` - Initialize generator
-- `generate(perfect)` - Generate the maze
-- `get_cell_walls(x, y)` - Return hex value for cell walls
-- `find_path(entry, exit)` - Return shortest path as list of directions
-- `save_to_file(filename, entry, exit)` - Save maze in required format
+### Planning (expected vs real)
+- Start: parser + generator + file output
+- Then: pathfinding + visual mode
+- End: polish, lint/mypy fixes, README
+
+### What worked well
+- clear split between main script and reusable module
+- deterministic generation with seed
+- simple controls for interactive mode
+
+### What can be improved
+- add more generation algorithms and animations
+
+### Tools used
+- Python 3.10+
+- flake8
+- mypy
+- Makefile
+- git
 
 ## Resources
+- 42 subject PDF/text for A-Maze-ing
+- Python docs: https://docs.python.org/3/
+- flake8 docs: https://flake8.pycqa.org/
+- mypy docs: https://mypy.readthedocs.io/
+- Maze generation overview: https://en.wikipedia.org/wiki/Maze_generation_algorithm
+- BFS overview: https://en.wikipedia.org/wiki/Breadth-first_search
 
-### Technical References
-- [Maze Generation Algorithms](https://en.wikipedia.org/wiki/Maze_generation_algorithm)
-- [Recursive Backtracker](https://en.wikipedia.org/wiki/Maze_generation_algorithm#Recursive_backtracker)
-- [Python Type Hints](https://docs.python.org/3/library/typing.html)
-- [Flake8 Coding Standards](https://flake8.pycqa.org/)
-
-### AI Usage
-
+## AI Usage
 AI was used for:
-- **Initial code structure** - Generating class skeletons and method signatures
-- **Documentation** - Formatting README and docstrings
-- **Debugging** - Identifying edge cases in maze validity checks
-- **Algorithm explanation** - Understanding recursive backtracker implementation
-
-All AI-generated code was reviewed, tested, and modified to ensure full understanding and compliance with project requirements.
-
-## Team Management
-
-### Roles
-- **[Your Name]** - Maze generation algorithm, reusable module, configuration parser
-
-*(If working in a team, list each member's role)*
-
-### Planning
-- Week 1: Implement MazeGenerator class and basic generation
-- Week 2: Add configuration parsing and output file format
-- Week 3: Implement visual rendering and interactive features
-- Week 4: Testing, documentation, and package building
-
-### What Worked Well
-- Recursive backtracker produced clean perfect mazes reliably
-- Type hints caught many bugs early
-- Unit tests validated maze consistency
-
-### What Could Be Improved
-- Add multiple algorithm options
-- Implement animation during generation
-- Add more color customization options
-
-### Tools Used
-- Python 3.10
-- Flake8 for linting
-- Mypy for type checking
-- Make for automation
-- Build package for distribution
-```
-
-This covers all the mandatory sections from Chapter VII of the subject. Adjust the login(s), algorithm details, and team information to match your actual implementation.
+- checking explanation clarity
+- drafting documentation text
+- getting info about the project
