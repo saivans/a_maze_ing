@@ -1,7 +1,7 @@
 import sys
 from typing import Set, Dict, Tuple
 from dataclasses import dataclass
-from maze_generator import MazeGenerator
+from mazegen.maze_generator import MazeGenerator
 
 
 @dataclass
