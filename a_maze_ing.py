@@ -42,12 +42,12 @@ def parse_config(file_path: str) -> MazeConfig:
         width = int(raw_config['WIDTH'])
         height = int(raw_config['HEIGHT'])
 
-        if width <= 0 or height <= 0:
-            raise ValueError("WIDTH and HEIGHT must be strictly positive.")
+        width = int(raw_config['WIDTH'])
+        height = int(raw_config['HEIGHT'])
 
-        if width < 7 or height < 5:
-            print("Error: The maze size does not allow the '42' pattern.",
-                  file=sys.stderr)
+        if width < 9 or height < 9:
+            raise ValueError("WIDTH and HEIGHT must be at least 9 to "
+                             "properly display the maze and the '42' pattern.")
 
         def parse_coords(coord_str: str, max_w: int, max_h: int
                          ) -> Tuple[int, int]:
@@ -64,7 +64,24 @@ def parse_config(file_path: str) -> MazeConfig:
 
         if entry == maze_exit:
             raise ValueError("ENTRY and EXIT cannot be the same.")
+        if entry == maze_exit:
+            raise ValueError("ENTRY and EXIT cannot be the same.")
 
+        cx, cy = width // 2 - 3, height // 2 - 2
+        pattern_42 = [
+            (0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (2, 1),
+            (2, 0), (2, 3), (2, 4),
+            (4, 0), (5, 0), (6, 0), (6, 1), (6, 2), (5, 2), (4, 2),
+            (4, 3), (4, 4), (5, 4), (6, 4)
+        ]
+        cells_42 = set((cx + dx, cy + dy) for dx, dy in pattern_42)
+
+        if entry in cells_42:
+            raise ValueError(f"ENTRY coordinates {entry} cannot "
+                             "be inside the reserved '42' pattern.")
+        if maze_exit in cells_42:
+            raise ValueError(f"EXIT coordinates {maze_exit} cannot be inside "
+                             "the reserved '42' pattern.")
         perfect_str = raw_config['PERFECT'].lower()
         if perfect_str in ('true', '1', 'yes'):
             perfect = True
